@@ -40,22 +40,40 @@ public class RegisterService {
     }
 
     /**
+     * gets a new confirmToken and sends to the email provided
      * @param email
      * @param traceId
      * @return firstName, token
      * @throws ResourceNotFoundException
      * @throws ResourceAlreadyExistsException
      */
-    public boolean newConfirmEmail(String email, String traceId) throws ResourceNotFoundException, ResourceAlreadyExistsException {
+    public boolean requestConfirmEmail(String email, String traceId) throws ResourceNotFoundException, ResourceAlreadyExistsException {
 
+        Map<String, ApiUser> emailApiUser = newConfirmToken(email, traceId);
+
+        Map.Entry<String, ApiUser> onlyEntry = emailApiUser.entrySet().iterator().next();
+        String confirmationToken = onlyEntry.getKey();
+        ApiUser apiUser = onlyEntry.getValue();
+
+        emailService.confirmEmail(email, apiUser.getFirstName(), confirmationToken);
+        return true;
+    }
+
+    /**
+     *
+     * @param email
+     * @param traceId
+     * @return the confirmation token and ApiUser of the passed email
+     * @throws ResourceNotFoundException
+     * @throws ResourceAlreadyExistsException
+     */
+    private Map<String, ApiUser> newConfirmToken(String email, String traceId) throws ResourceNotFoundException, ResourceAlreadyExistsException {
         ApiUser userToSendToken = apiUserService.findByEmail(email, traceId);
         if (!userToSendToken.isEnabled()) {
             String confirmationToken = JWTConfig.JWTTokenBuilder(userToSendToken.getUsername(),
                     TokenUtils.ACCESS_VALIDITY,
                     jwtKey.getConfirmationSecretKey());
-
-            emailService.confirmEmail(email, userToSendToken.getFirstName(), confirmationToken);
-            return true;
+            return Map.of(confirmationToken, userToSendToken);
         }
         throw new ResourceAlreadyExistsException("User is already enabled, please use login option", traceId);
     }

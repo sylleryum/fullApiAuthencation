@@ -83,7 +83,8 @@ public class AuthController {
     }
 
     /**
-     * used to enable user, either confirmToken or usernameEmail should be present, not both
+     * used to enable user, either confirmToken or usernameEmail should be present, not both. By default it sends an email to the provided email (usernameEmail)
+     * with the confirm token, to get a confirm token without sending email the method newConfirmToken from {@link RegisterService} should be used instead (currently private).
      * @param traceIdHeader
      * @param confirmToken enable user with the token received through the param confirm-token=token-received
      * @param usernameEmail requests a new confirm token to activate the user through the param request-token=email
@@ -111,7 +112,7 @@ public class AuthController {
         //new activation email
         if (usernameEmail.isPresent()) {
             String email = usernameEmail.get().trim();
-            registerService.newConfirmEmail(email, traceId);
+            registerService.requestConfirmEmail(email, traceId);
             return ResponseEntity.ok(CONFIRM_NEW_ACTIVATION_EMAIL);
         }
         throw new TokenException(traceId, CONFIRM_EXCEPTION);
@@ -147,7 +148,8 @@ public class AuthController {
     }
 
     /**
-     * used to reset an user's password, this endpoint should be used prior to ResetPWD to validate and enable the password reset
+     * used to reset an user's password, this endpoint should be used prior to ResetPWD to validate and enable the password reset. By default it sends
+     * a reset token to the provided email on the header email. To get a reset token without sending email the method newResetToken from {@link ResetTokenService} should be used instead (currently private).
      * @param traceIdHeader
      * @param email if email received in this parameter is valid, sends an email to confirm/enable the password reset
      * @param resetToken receives the confirm-token and enables the same, if this is successful, ResetPWD endpoint can be used
