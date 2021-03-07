@@ -3,7 +3,7 @@ This is a full authentication to protect an application, including register, log
 
 ![auth flow](https://github.com/sylleryum/fullApiAuthencationAuthorization/blob/main/Auth%20flow.jpeg)
 
-## 1 - Reset
+## 1 - Register
 Method: Post
 
 Body:<br/>
